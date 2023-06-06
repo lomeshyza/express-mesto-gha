@@ -25,22 +25,22 @@ const User = require('../models/user');
 const getUsers = (req, res) => {
   console.log('Запрос на users');
   User.find({})
-    .then((users)=> res.status(200).send(users))
-    .catch((err)=> res.status(500).send({message: 'Internal Server Error', err: err.message, stack: err.stack}))
+    .then((users) => res.status(200).send(users))
+    .catch((err) => res.status(500).send({ message: 'Internal Server Error', err: err.message, stack: err.stack }));
 };
 
 const getUserById = (req, res) => {
   User.findById(req.params.id)
-    .then((users) => res.status(200).send(user))
-    .catch((err)=> res.status(500).send({message: 'Internal Server Error', err: err.message, stack: err.stack}))
+    .then((user) => res.status(200).send(user))
+    .catch((err) => res.status(500).send({ message: 'Internal Server Error', err: err.message, stack: err.stack }));
   console.log('Запрос на userbyid');
 };
 
-const createUser = (req, res)=> {
+const createUser = (req, res) => {
   console.log(req.body);
   User.create(req.body)
-  .then((user) => res.status(201).send(user))
-  .catch((err)=> res.status(500).send({message: 'Internal Server Error', err: err.message, stack: err.stack}))
+    .then((user) => res.status(201).send(user))
+    .catch((err) => res.status(500).send({ message: 'Internal Server Error', err: err.message, stack: err.stack }));
   console.log('Post на users');
 };
 

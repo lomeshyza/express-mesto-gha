@@ -19,14 +19,12 @@ const getCards = (req, res) => {
 
 const deleteCardById = (req, res) => {
   Card.findByIdAndRemove(req.params.id)
-    .orFail(() => new Error("Not found"))
     .then((card) => {
       if (!card) {
         res.status(notFound).send({
           message: "Card not found",
         });
-      } else{res.status(200).send({ message: "Card deleted" });}
-
+      } else {res.status(200).send({ message: "Card deleted" })}
     })
     .catch((err) => {
       if (err.message.includes("ObjectId failed")) {

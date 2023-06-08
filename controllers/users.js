@@ -13,7 +13,6 @@ const getUsers = (req, res) => {
 
 const getUserById = (req, res) => {
   User.findById(req.params.id)
-    .orFail(() => new Error('Validation failed'))
     .then((user) => {
       if (!user) {
         res.status(notFound).send({

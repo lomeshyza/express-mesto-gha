@@ -24,9 +24,9 @@ const getUserById = (req, res) => {
       }
     })
     .catch((err) => {
-      if (err.message === 'Validation failed') {
+      if (err.message.includes('ObjectId failed')) {
         res.status(badRequest).send({
-          message: 'Bad Request',
+          message: 'Bad request',
         });
       } else {
         res.status(internalServerError).send({
@@ -40,11 +40,11 @@ const getUserById = (req, res) => {
 
 const createUser = (req, res) => {
   User.create(req.body)
-    .orFail(() => new Error('Validation failed'))
+
     .then((user) => res.status(201).send(user))
     .catch((err) => {
-      if (err.message.includes('Validation failed')) {
-        res.status(badRequest).send({ message: 'Bad Request' });
+      if (err.message.includes('user validation failed')) {
+        res.status(badRequest).send({ message: `${err.message}` });
       } else {
         res.status(internalServerError).send({
           message: 'Internal Server Error',

@@ -24,15 +24,22 @@ const router = require('./routes');
 
 const app = express();
 
-mongoose.connect('mongodb://localhost:27017/mestodb', {
+mongoose.connect('mongodb://127.0.0.1/mestodb', {
   useNewUrlParser: true,
 });
 
 app.use(express.json());
 
+app.use((req, res, next) => {
+  req.user = {
+    _id: '647ef8eb23c44ae24c633697',
+  };
+  next();
+});
+
 app.use(router);
 
 app.listen(3000, () => {
   // eslint-disable-next-line no-console
-  console.log('Слушаю порт 3000');
+  console.log('App listening on port 3000');
 });

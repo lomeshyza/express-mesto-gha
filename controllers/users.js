@@ -1,51 +1,121 @@
-/* const User = require('../models/user');
-
-module.exports.getUsers = (req, res) => {
-  User.find({})
-    .then((users) => res.send({ data: users }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
-};
-
-module.exports.getUserById = (req, res) => {
-  const { userId } = req.body;
-  User.findById({ user: userId })
-    .then((users) => res.send({ data: users }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
-};
-
-module.exports.createUser((req, res) => {
-  const { name, about, avatar } = req.body;
-  User.create({ name, about, avatar })
-    .then((user) => res.send({ data: user }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
-});
- */
 const User = require('../models/user');
+const { badRequest, notFound, internalServerError } = require('../utils/errors');
 
 const getUsers = (req, res) => {
-  console.log('Запрос на users');
   User.find({})
     .then((users) => res.status(200).send(users))
-    .catch((err) => res.status(500).send({ message: 'Internal Server Error', err: err.message, stack: err.stack }));
+    .catch((err) => res.status(500).send({
+      message: 'Internal Server Error',
+      err: err.message,
+      stack: err.stack,
+    }));
 };
 
 const getUserById = (req, res) => {
   User.findById(req.params.id)
-    .then((user) => res.status(200).send(user))
-    .catch((err) => res.status(500).send({ message: 'Internal Server Error', err: err.message, stack: err.stack }));
-  console.log('Запрос на userbyid');
+    .orFail(() => new Error('Validation failed'))
+    .then((user) => {
+      if (!user) {
+        res.status(notFound).send({
+          message: 'User not found',
+        });
+      } else {
+        res.status(200).send(user);
+      }
+    })
+    .catch((err) => {
+      if (err.message === 'Validation failed') {
+        res.status(badRequest).send({
+          message: 'Bad Request',
+        });
+      } else {
+        res.status(internalServerError).send({
+          message: 'Internal Server Error',
+          err: err.message,
+          stack: err.stack,
+        });
+      }
+    });
 };
 
 const createUser = (req, res) => {
-  console.log(req.body);
   User.create(req.body)
+    .orFail(() => new Error('Validation failed'))
     .then((user) => res.status(201).send(user))
-    .catch((err) => res.status(500).send({ message: 'Internal Server Error', err: err.message, stack: err.stack }));
-  console.log('Post на users');
+    .catch((err) => {
+      if (err.message.includes('Validation failed')) {
+        res.status(badRequest).send({ message: 'Bad Request' });
+      } else {
+        res.status(internalServerError).send({
+          message: 'Internal Server Error',
+          err: err.message,
+          stack: err.stack,
+        });
+      }
+    });
+};
+const updateAvatar = (req, res) => {
+  User.findByIdAndUpdate(
+    req.user._id,
+    { avatar: req.body.avatar },
+    { new: true, runValidators: true },
+  )
+    .orFail(() => new Error('Validation failed'))
+    .then((user) => {
+      if (!user) {
+        res.status(notFound).send({
+          message: 'User not found',
+        });
+      } else {
+        res.status(200).send(user);
+      }
+    })
+    .catch((err) => {
+      if (err.message.includes('Validation failed')) {
+        res.status(badRequest).send({ message: 'Bad Request' });
+      } else {
+        res.status(internalServerError).send({
+          message: 'Internal Server Error',
+          err: err.message,
+          stack: err.stack,
+        });
+      }
+    });
+};
+
+const updateProfile = (req, res) => {
+  User.findByIdAndUpdate(
+    req.user._id,
+    { name: req.body.name, about: req.body.about },
+    { new: true, runValidators: true },
+  )
+    .orFail(() => new Error('Validation failed'))
+    .then((user) => {
+      if (!user) {
+        res.status(notFound).send({
+          message: 'User not found',
+        });
+      } else {
+        res.status(200).send(user);
+      }
+    })
+    .catch((err) => {
+      if (err.message.includes('Validation failed')) {
+        res.status(badRequest).send({ message: 'Bad Request' });
+      } else {
+        res.status(internalServerError).send({
+          message: 'Internal Server Error',
+          err: err.message,
+          stack: err.stack,
+        });
+      }
+    });
 };
 
 module.exports = {
   getUsers,
   getUserById,
   createUser,
+  updateAvatar,
+  updateProfile,
 };

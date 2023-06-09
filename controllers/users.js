@@ -3,11 +3,9 @@ const { badRequest, notFound, internalServerError } = require('../utils/errors')
 
 const getUsers = (req, res) => {
   User.find({})
-    .then((users) => res.status(200).send(users))
-    .catch((err) => res.status(500).send({
+    .then((users) => res.send(users))
+    .catch(() => res.status(500).send({
       message: 'Internal Server Error',
-      err: err.message,
-      stack: err.stack,
     }));
 };
 
@@ -19,7 +17,7 @@ const getUserById = (req, res) => {
           message: 'User not found',
         });
       } else {
-        res.status(200).send(user);
+        res.send(user);
       }
     })
     .catch((err) => {
@@ -30,8 +28,6 @@ const getUserById = (req, res) => {
       } else {
         res.status(internalServerError).send({
           message: 'Internal Server Error',
-          err: err.message,
-          stack: err.stack,
         });
       }
     });
@@ -43,12 +39,10 @@ const createUser = (req, res) => {
     .then((user) => res.status(201).send(user))
     .catch((err) => {
       if (err.message.includes('user validation failed')) {
-        res.status(badRequest).send({ message: `${err.message}` });
+        res.status(badRequest).send({ message: 'Bad request' });
       } else {
         res.status(internalServerError).send({
           message: 'Internal Server Error',
-          err: err.message,
-          stack: err.stack,
         });
       }
     });
@@ -59,24 +53,21 @@ const updateAvatar = (req, res) => {
     { avatar: req.body.avatar },
     { new: true, runValidators: true },
   )
-    .orFail(() => new Error('Validation failed'))
     .then((user) => {
       if (!user) {
         res.status(notFound).send({
           message: 'User not found',
         });
       } else {
-        res.status(200).send(user);
+        res.send(user);
       }
     })
     .catch((err) => {
       if (err.message.includes('Validation failed')) {
-        res.status(badRequest).send({ message: 'Bad Request' });
+        res.status(badRequest).send({ message: 'Bad request' });
       } else {
         res.status(internalServerError).send({
           message: 'Internal Server Error',
-          err: err.message,
-          stack: err.stack,
         });
       }
     });
@@ -88,14 +79,13 @@ const updateProfile = (req, res) => {
     { name: req.body.name, about: req.body.about },
     { new: true, runValidators: true },
   )
-    .orFail(() => new Error('Validation failed'))
     .then((user) => {
       if (!user) {
         res.status(notFound).send({
           message: 'User not found',
         });
       } else {
-        res.status(200).send(user);
+        res.send(user);
       }
     })
     .catch((err) => {
@@ -104,8 +94,6 @@ const updateProfile = (req, res) => {
       } else {
         res.status(internalServerError).send({
           message: 'Internal Server Error',
-          err: err.message,
-          stack: err.stack,
         });
       }
     });

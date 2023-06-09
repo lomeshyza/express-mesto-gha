@@ -1,20 +1,16 @@
-const Card = require("../models/card");
+const Card = require('../models/card');
 const {
   badRequest,
   notFound,
   internalServerError,
-} = require("../utils/errors");
+} = require('../utils/errors');
 
 const getCards = (req, res) => {
   Card.find({})
-    .then((cards) => res.status(200).send(cards))
-    .catch((err) =>
-      res.status(internalServerError).send({
-        message: "Internal Server Error",
-        err: err.message,
-        stack: err.stack,
-      })
-    );
+    .then((cards) => res.send(cards))
+    .catch(() => res.status(internalServerError).send({
+      message: 'Internal Server Error',
+    }));
 };
 
 const deleteCardById = (req, res) => {
@@ -22,20 +18,20 @@ const deleteCardById = (req, res) => {
     .then((card) => {
       if (!card) {
         res.status(notFound).send({
-          message: "Card not found",
+          message: 'Card not found',
         });
-      } else {res.status(200).send({ message: "Card deleted" })}
+      } else {
+        res.send({ message: 'Card deleted' });
+      }
     })
     .catch((err) => {
-      if (err.message.includes("ObjectId failed")) {
+      if (err.message.includes('ObjectId failed')) {
         res.status(badRequest).send({
-          message: "Bad request",
+          message: 'Bad request',
         });
       } else {
         res.status(internalServerError).send({
-          message: "Internal Server Error",
-          err: err.message,
-          stack: err.stack,
+          message: 'Internal Server Error',
         });
       }
     });
@@ -45,13 +41,11 @@ const createCard = (req, res) => {
   Card.create({ ...req.body, owner: req.user._id })
     .then((card) => res.status(201).send(card))
     .catch((err) => {
-      if (err.message.includes("card validation failed")) {
-        res.status(badRequest).send({ message: `${err.message}` });
+      if (err.message.includes('card validation failed')) {
+        res.status(badRequest).send({ message: 'Bad request' });
       } else {
         res.status(internalServerError).send({
-          message: "Internal Server Error",
-          err: err.message,
-          stack: err.stack,
+          message: 'Internal Server Error',
         });
       }
     });
@@ -61,49 +55,47 @@ const likeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.id,
     { $addToSet: { likes: req.user._id } },
-    { new: true, runValidators: true }
+    { new: true, runValidators: true },
   )
     .then((card) => {
       if (!card) {
-        res.status(notFound).send({ message: "Card not found" });
-      } else {res.status(200).send({ message: "Like added" })}
+        res.status(notFound).send({ message: 'Card not found' });
+      } else {
+        res.send({ message: 'Like added' });
+      }
     })
     .catch((err) => {
-      if (err.message.includes("ObjectId failed")) {
-        res.status(badRequest).send({ message: "Bad request" });
+      if (err.message.includes('ObjectId failed')) {
+        res.status(badRequest).send({ message: 'Bad request' });
       } else {
         res.status(internalServerError).send({
-          message: "Internal Server Error",
-          err: err.message,
-          stack: err.stack,
+          message: 'Internal Server Error',
         });
       }
     });
-  console.log("Like card");
 };
 
-const dislikeCard = (req, res) =>
-  Card.findByIdAndUpdate(
-    req.params.id,
-    { $pull: { likes: req.user._id } },
-    { new: true, runValidators: true },
-  )
+const dislikeCard = (req, res) => Card.findByIdAndUpdate(
+  req.params.id,
+  { $pull: { likes: req.user._id } },
+  { new: true, runValidators: true },
+)
   .then((card) => {
     if (!card) {
-      res.status(notFound).send({ message: "Card not found" });
-    } else {res.status(200).send({ message: "Like deleted" })}
+      res.status(notFound).send({ message: 'Card not found' });
+    } else {
+      res.send({ message: 'Like deleted' });
+    }
   })
   .catch((err) => {
-    if (err.message.includes("ObjectId failed")) {
-      res.status(badRequest).send({ message: "Bad request" });
+    if (err.message.includes('ObjectId failed')) {
+      res.status(badRequest).send({ message: 'Bad request' });
     } else {
       res.status(internalServerError).send({
-        message: "Internal Server Error",
-        err: err.message,
-        stack: err.stack,
-        });
-      }
-    });
+        message: 'Internal Server Error',
+      });
+    }
+  });
 module.exports = {
   getCards,
   deleteCardById,

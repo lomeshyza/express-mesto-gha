@@ -1,6 +1,6 @@
 class ConflictError extends Error {
-  constructor(message) {
-    super(message);
+  constructor(err) {
+    super(err);
     this.message = 'This email is already registered';
     this.statusCode = 409;
   }

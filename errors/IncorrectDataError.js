@@ -1,6 +1,6 @@
 class IncorrectDataError extends Error {
-  constructor(message) {
-    super(message);
+  constructor(err) {
+    super(err);
     this.message = 'Incorrect data';
     this.statusCode = 403;
   }

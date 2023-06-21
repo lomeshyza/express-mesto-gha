@@ -1,7 +1,6 @@
 class AuthError extends Error {
-  constructor(message) {
-    console.log(message);
-    super(message);
+  constructor(err) {
+    super(err);
     this.message = 'Unauthorized';
     this.statusCode = 401;
   }

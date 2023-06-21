@@ -8,22 +8,32 @@ const { notFound } = require('../utils/errors');
 
 const regex = /^(https?:\/\/)?[a-zA-Z\d-]+\.[\w\d\-.~:/?#[\]@!$&'()*+,;=]{2,}#?/;
 
-router.post('/signup', celebrate({
-  body: Joi.object().keys({
-    name: Joi.string().min(2).max(30),
-    about: Joi.string().min(2).max(30),
-    avatar: Joi.string().pattern(regex),
-    email: Joi.string().required().email(),
-    password: Joi.string().required().min(2).max(30),
-  }).unknown(true),
-}), createUser);
-
-router.post('/signin', celebrate({
-  body: Joi.object().keys({
-    email: Joi.string().required().email(),
-    password: Joi.string().required().min(2).max(30),
+router.post(
+  '/signup',
+  celebrate({
+    body: Joi.object()
+      .keys({
+        name: Joi.string().min(2).max(30),
+        about: Joi.string().min(2).max(30),
+        avatar: Joi.string().pattern(regex),
+        email: Joi.string().required().email(),
+        password: Joi.string().required().min(2),
+      })
+      .unknown(true),
   }),
-}), login);
+  createUser,
+);
+
+router.post(
+  '/signin',
+  celebrate({
+    body: Joi.object().keys({
+      email: Joi.string().required().email(),
+      password: Joi.string().required().min(2),
+    }),
+  }),
+  login,
+);
 
 router.use(auth);
 

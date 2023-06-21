@@ -13,18 +13,13 @@ const getCards = (req, res, next) => {
 const deleteCardById = (req, res, next) => {
   Card.findById(req.params.id)
     .then((card) => {
-      console.log(`card.owner: ${card.owner}`);
-      console.log(`req.user._id: ${req.user._id}`);
-      console.log(`Эта ошибка card: ${card._id}`);
       if (!card) {
         throw new Error('Not found');
       }
       if (card.owner.toString() !== req.user._id) {
         throw new Error('Incorrect data');
       } else {
-        console.log(`Эта ошибка card: ${card._id}`);
-        return Card.findByIdAndRemove(card._id)
-          .then(() => res.send({ message: 'Card deleted' }));
+        return Card.findByIdAndRemove(card._id).then(() => res.send({ message: 'Card deleted' }));
       }
     })
     .catch(next);

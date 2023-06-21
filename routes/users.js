@@ -15,7 +15,11 @@ router.get('/', getUsers);
 
 router.get('/me', getCurrentUser);
 
-router.get('/:id', getUserById);
+router.get('/:id', celebrate({
+  params: Joi.object().keys({
+    id: Joi.string().required().length(24).hex(),
+  }),
+}), getUserById);
 
 router.post('/', createUser);
 

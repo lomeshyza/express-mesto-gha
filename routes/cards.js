@@ -7,7 +7,11 @@ const {
 const regex = /^(https?:\/\/)?[a-zA-Z\d-]+\.[\w\d\-.~:/?#[\]@!$&'()*+,;=]{2,}#?/;
 router.get('/', getCards);
 
-router.delete('/:id', deleteCardById);
+router.delete('/:id', celebrate({
+  params: Joi.object().keys({
+    cardId: Joi.string().required().length(24).hex(),
+  }),
+}), deleteCardById);
 
 router.post('/', celebrate({
   body: Joi.object().keys({
@@ -16,8 +20,16 @@ router.post('/', celebrate({
   }).unknown(true),
 }), createCard);
 
-router.put('/:id/likes', likeCard);
+router.put('/:id/likes', celebrate({
+  params: Joi.object().keys({
+    cardId: Joi.string().required().length(24).hex(),
+  }),
+}), likeCard);
 
-router.delete('/:id/likes', dislikeCard);
+router.delete('/:id/likes', celebrate({
+  params: Joi.object().keys({
+    cardId: Joi.string().required().length(24).hex(),
+  }),
+}), dislikeCard);
 
 module.exports = router;

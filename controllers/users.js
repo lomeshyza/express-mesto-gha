@@ -1,13 +1,34 @@
 const bcrypt = require('bcryptjs');
 const jsonWebToken = require('jsonwebtoken');
 const User = require('../models/user');
-// const { NotFoundError } = require('../errors/NotFoundError');
-const { badRequest, notFound, internalServerError } = require('../utils/errors');
 
 const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch(next);
+    .catch((err) => {
+      next(err);
+      console.log(err.statusCode);
+    });
+};
+
+const getCurrentUser = (req, res, next) => {
+  console.log(req.user._id);
+  console.log(req.params.id);
+  User.findById(req.user._id)
+    .then((user) => {
+      if (!user) {
+        throw new Error('User not found');
+      } else {
+        res.send(user);
+      }
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new Error('Validation failed'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 const getUserById = (req, res, next) => {
@@ -15,17 +36,19 @@ const getUserById = (req, res, next) => {
     .then((user) => {
       if (!user) {
         throw new Error('User not found');
-        /* res.status(notFound).send({
-          message: 'User not found',
-        }); */
       } else {
         res.send(user);
       }
     })
     .catch((err) => {
-      next(err);
+      if (err.name === 'CastError') {
+        next(new Error('Validation failed'));
+      } else {
+        next(err);
+      }
     });
 };
+
 const createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
@@ -53,9 +76,7 @@ const updateAvatar = (req, res, next) => {
   )
     .then((user) => {
       if (!user) {
-        res.status(notFound).send({
-          message: 'User not found',
-        });
+        throw new Error('User not found');
       } else {
         res.send(user);
       }
@@ -64,6 +85,7 @@ const updateAvatar = (req, res, next) => {
 };
 
 const updateProfile = (req, res, next) => {
+  console.log(req.body.name);
   User.findByIdAndUpdate(
     req.user._id,
     { name: req.body.name, about: req.body.about },
@@ -71,9 +93,7 @@ const updateProfile = (req, res, next) => {
   )
     .then((user) => {
       if (!user) {
-        res.status(notFound).send({
-          message: 'User not found',
-        });
+        throw new Error('User not found');
       } else {
         res.send(user);
       }
@@ -88,9 +108,7 @@ const login = (req, res, next) => {
     .then(
       (user) => {
         if (!user) {
-          res.status(notFound).send({
-            message: 'Login or password is incorrect',
-          });
+          throw new Error('jwt must be provided');
         } else {
           bcrypt.compare(String(password), user.password)
             .then((isValidUser) => {
@@ -113,7 +131,11 @@ const login = (req, res, next) => {
         }
       },
     )
-    .catch(next);
+    .catch((err) => {
+      next(err);
+      console.log(`Эта ошибка: ${err}`);
+      console.log(`Код ошибки: ${err.code}`);
+    });
 };
 
 /* const login = (req, res) => {
@@ -137,7 +159,7 @@ const login = (req, res, next) => {
           message: 'Login or password is incorrect',
         });
       } else {
-        res.send({ message: 'Passord is correct' });
+        res.send({ message: 'Password is correct' });
       }
     })
     .catch((err) => {
@@ -160,6 +182,7 @@ const login = (req, res, next) => {
 
 module.exports = {
   getUsers,
+  getCurrentUser,
   getUserById,
   createUser,
   updateAvatar,

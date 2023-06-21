@@ -12,29 +12,23 @@ const getCards = (req, res) => {
       message: 'Internal Server Error',
     }));
 };
-
-const deleteCardById = (req, res) => {
-  Card.findByIdAndRemove(req.params.id)
+const deleteCardById = (req, res, next) => {
+  Card.findById(req.params.id)
     .then((card) => {
+      console.log(`card.owner: ${card.owner}`);
+      console.log(`req.user._id: ${req.user._id}`);
+      console.log(`Эта ошибка card: ${card._id}`);
       if (!card) {
-        res.status(notFound).send({
-          message: 'Card not found',
-        });
+        throw new Error('User not found');
+      }
+      if (card.owner.toString() !== req.user._id) {
+        throw new Error('Incorrect data');
       } else {
-        res.send({ message: 'Card deleted' });
+        console.log(`Эта ошибка card: ${card._id}`);
+        return Card.findByIdAndRemove(card._id).then(() => res.send({ message: 'Card deleted' }));
       }
     })
-    .catch((err) => {
-      if (err.message.includes('ObjectId failed')) {
-        res.status(badRequest).send({
-          message: 'Bad request',
-        });
-      } else {
-        res.status(internalServerError).send({
-          message: 'Internal Server Error',
-        });
-      }
-    });
+    .catch(next);
 };
 
 const createCard = (req, res) => {

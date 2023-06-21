@@ -8,9 +8,10 @@ const auth = (req, res, next) => {
     console.log(payload);
   } catch (err) {
     next(err);
-    console.log(err);
+    console.log(`Код ошибки: ${err}`);
   }
   req.user = payload;
+
   next();
 };
 module.exports = auth;

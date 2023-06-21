@@ -1,12 +1,29 @@
 const router = require('express').Router();
+const { celebrate, Joi } = require('celebrate');
 const userRoutes = require('./users');
 const cardRoutes = require('./cards');
 const auth = require('../middlewares/auth');
 const { createUser, login } = require('../controllers/users');
 const { notFound } = require('../utils/errors');
 
-router.post('/signup', createUser);
-router.post('/signin', login);
+const regex = /^(https?:\/\/)?[a-zA-Z\d-]+\.[\w\d\-.~:/?#[\]@!$&'()*+,;=]{2,}#?/;
+
+router.post('/signup', celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().min(2).max(30),
+    about: Joi.string().min(2).max(30),
+    avatar: Joi.string().pattern(regex),
+    email: Joi.string().required().email(),
+    password: Joi.string().required().min(2).max(30),
+  }).unknown(true),
+}), createUser);
+
+router.post('/signin', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    password: Joi.string().required().min(2).max(30),
+  }),
+}), login);
 
 router.use(auth);
 

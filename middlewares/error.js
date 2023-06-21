@@ -33,10 +33,9 @@ const errorHandler = (err, req, res, next) => {
         ? 'На сервере произошла ошибка'
         : message,
     }); */
-  /* if (err.message === 'Validation failed') {
+  if (err.message === 'Validation failed') {
     error = new BadRequestError(err);
-  } else  */
-  if (err.message === 'User not found') {
+  } else if (err.message === 'Not found') {
     error = new NotFoundError(err);
   } else if (err.code === 11000) {
     error = new ConflictError(err);
@@ -47,7 +46,7 @@ const errorHandler = (err, req, res, next) => {
   } else {
     error = new ServerError(err);
     console.log(`Эта ошибка: ${err}`);
-    console.log(`Код ошибки: ${err.code}`);
+    console.log(`Код ошибки: ${err.statusCode}`);
   }
   res.status(error.statusCode).send({ message: error.message });
 

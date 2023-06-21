@@ -2,12 +2,13 @@ const bcrypt = require('bcryptjs');
 const jsonWebToken = require('jsonwebtoken');
 const User = require('../models/user');
 
+const statusCreated = 201;
+
 const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send(users))
     .catch((err) => {
       next(err);
-      console.log(err.statusCode);
     });
 };
 
@@ -17,17 +18,13 @@ const getCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
       if (!user) {
-        throw new Error('User not found');
+        throw new Error('Not found');
       } else {
         res.send(user);
       }
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new Error('Validation failed'));
-      } else {
-        next(err);
-      }
+      next(err);
     });
 };
 
@@ -35,17 +32,13 @@ const getUserById = (req, res, next) => {
   User.findById(req.params.id)
     .then((user) => {
       if (!user) {
-        throw new Error('User not found');
+        throw new Error('Not found');
       } else {
         res.send(user);
       }
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new Error('Validation failed'));
-      } else {
-        next(err);
-      }
+      next(err);
     });
 };
 
@@ -58,7 +51,7 @@ const createUser = (req, res, next) => {
       User.create({
         name, about, avatar, email, password: hash,
       })
-        .then((user) => res.status(201).send({ data: user }))
+        .then((user) => res.status(statusCreated).send({ data: user }))
         .catch((err) => {
           next(err);
           console.log(`Эта ошибка: ${err}`);
@@ -76,12 +69,14 @@ const updateAvatar = (req, res, next) => {
   )
     .then((user) => {
       if (!user) {
-        throw new Error('User not found');
+        throw new Error('Not found');
       } else {
         res.send(user);
       }
     })
-    .catch(next);
+    .catch((err) => {
+      next(err);
+    });
 };
 
 const updateProfile = (req, res, next) => {
@@ -93,12 +88,14 @@ const updateProfile = (req, res, next) => {
   )
     .then((user) => {
       if (!user) {
-        throw new Error('User not found');
+        throw new Error('Not found');
       } else {
         res.send(user);
       }
     })
-    .catch(next);
+    .catch((err) => {
+      next(err);
+    });
 };
 
 const login = (req, res, next) => {
@@ -125,7 +122,7 @@ const login = (req, res, next) => {
                 });
                 res.send({ data: user.toJSON() });
               } else {
-                res.status(403).send({ message: 'Password is incorrect' });
+                throw new Error('Password is incorrect');
               }
             });
         }

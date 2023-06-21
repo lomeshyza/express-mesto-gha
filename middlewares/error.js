@@ -33,9 +33,10 @@ const errorHandler = (err, req, res, next) => {
         ? 'На сервере произошла ошибка'
         : message,
     }); */
-  if (err.message === 'Validation failed') {
+  /* if (err.message === 'Validation failed') {
     error = new BadRequestError(err);
-  } else if (err.message === 'User not found') {
+  } else  */
+  if (err.message === 'User not found') {
     error = new NotFoundError(err);
   } else if (err.code === 11000) {
     error = new ConflictError(err);

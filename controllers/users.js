@@ -2,10 +2,10 @@ const bcrypt = require('bcryptjs');
 const jsonWebToken = require('jsonwebtoken');
 const User = require('../models/user');
 const NotFoundError = require('../errors/NotFoundError');
-const ForbiddenError = require('../errors/ForbiddenError');
 const ConflictError = require('../errors/ConflictError');
 const BadRequestError = require('../errors/BadRequestError');
-const statusCreated = require('../utils/errors');
+const { statusCreated } = require('../utils/errors');
+const AuthError = require('../errors/AuthError');
 
 const getUsers = (req, res, next) => {
   User.find({})
@@ -133,7 +133,7 @@ const login = (req, res, next) => {
     .select('+password')
     .then((user) => {
       if (!user) {
-        throw new ForbiddenError('Incorrect data');
+        throw new AuthError('Login or password is incorrect');
       } else {
         bcrypt.compare(String(password), user.password)
           .then((isValidUser) => {
@@ -153,7 +153,7 @@ const login = (req, res, next) => {
               });
               res.send({ data: user.toJSON() });
             } else {
-              throw new ForbiddenError('Incorrect data');
+              throw new AuthError('Login or password is incorrect');
             }
           })
           .catch((err) => {

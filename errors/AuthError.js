@@ -1,8 +1,9 @@
+const authError = require('../utils/errors');
+
 class AuthError extends Error {
-  constructor(err) {
-    super(err);
-    this.message = 'Unauthorized';
-    this.statusCode = 401;
+  constructor(message) {
+    super(message);
+    this.statusCode = authError;
   }
 }
 

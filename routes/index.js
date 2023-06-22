@@ -4,7 +4,7 @@ const userRoutes = require('./users');
 const cardRoutes = require('./cards');
 const auth = require('../middlewares/auth');
 const { createUser, login } = require('../controllers/users');
-const { notFound } = require('../utils/errors');
+const NotFoundError = require('../errors/NotFoundError');
 
 const regex = /^(https?:\/\/)?[a-zA-Z\d-]+\.[\w\d\-.~:/?#[\]@!$&'()*+,;=]{2,}#?/;
 
@@ -39,8 +39,8 @@ router.use(auth);
 
 router.use('/users', userRoutes);
 router.use('/cards', cardRoutes);
-router.use('/*', (req, res) => {
-  res.status(notFound).send({ message: 'Page not found' });
+router.use('/*', (req, res, next) => {
+  next(new NotFoundError('Not found'));
 });
 
 module.exports = router;

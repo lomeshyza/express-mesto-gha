@@ -1,8 +1,9 @@
+const conflictError = require('../utils/errors');
+
 class ConflictError extends Error {
-  constructor(err) {
-    super(err);
-    this.message = 'This email is already registered';
-    this.statusCode = 409;
+  constructor(message) {
+    super(message);
+    this.statusCode = conflictError;
   }
 }
 module.exports = ConflictError;

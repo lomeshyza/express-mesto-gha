@@ -1,8 +1,11 @@
 const bcrypt = require('bcryptjs');
 const jsonWebToken = require('jsonwebtoken');
 const User = require('../models/user');
-
-const statusCreated = 201;
+const NotFoundError = require('../errors/NotFoundError');
+const ForbiddenError = require('../errors/ForbiddenError');
+const ConflictError = require('../errors/ConflictError');
+const BadRequestError = require('../errors/BadRequestError');
+const statusCreated = require('../utils/errors');
 
 const getUsers = (req, res, next) => {
   User.find({})
@@ -16,13 +19,17 @@ const getCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
       if (!user) {
-        throw new Error('Not found');
+        throw new NotFoundError('User not found');
       } else {
         res.send(user);
       }
     })
     .catch((err) => {
-      next(err);
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Bad request'));
+      } else {
+        next(err);
+      }
     });
 };
 
@@ -30,13 +37,17 @@ const getUserById = (req, res, next) => {
   User.findById(req.params.id)
     .then((user) => {
       if (!user) {
-        throw new Error('Not found');
+        throw new NotFoundError('User not found');
       } else {
         res.send(user);
       }
     })
     .catch((err) => {
-      next(err);
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Bad request'));
+      } else {
+        next(err);
+      }
     });
 };
 
@@ -54,12 +65,22 @@ const createUser = (req, res, next) => {
         email,
         password: hash,
       })
-        .then((user) => res.status(statusCreated).send({ data: user }))
+        .then((user) => {
+          res.status(statusCreated).send({ data: user });
+        })
         .catch((err) => {
-          next(err);
+          if (err.code === 11000) {
+            next(new ConflictError('This email is already registered'));
+          } else if (err.name === 'ValidationError') {
+            next(new BadRequestError('Bad request'));
+          } else {
+            next(err);
+          }
         });
     })
-    .catch(next);
+    .catch((err) => {
+      next(err);
+    });
 };
 
 const updateAvatar = (req, res, next) => {
@@ -70,13 +91,17 @@ const updateAvatar = (req, res, next) => {
   )
     .then((user) => {
       if (!user) {
-        throw new Error('Not found');
+        throw new NotFoundError('User not found');
       } else {
         res.send(user);
       }
     })
     .catch((err) => {
-      next(err);
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Bad request'));
+      } else {
+        next(err);
+      }
     });
 };
 
@@ -88,13 +113,17 @@ const updateProfile = (req, res, next) => {
   )
     .then((user) => {
       if (!user) {
-        throw new Error('Not found');
+        throw new NotFoundError('User not found');
       } else {
         res.send(user);
       }
     })
     .catch((err) => {
-      next(err);
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Bad request'));
+      } else {
+        next(err);
+      }
     });
 };
 
@@ -104,32 +133,40 @@ const login = (req, res, next) => {
     .select('+password')
     .then((user) => {
       if (!user) {
-        throw new Error('jwt must be provided');
+        throw new ForbiddenError('Incorrect data');
       } else {
-        bcrypt.compare(String(password), user.password).then((isValidUser) => {
-          if (isValidUser) {
+        bcrypt.compare(String(password), user.password)
+          .then((isValidUser) => {
+            if (isValidUser) {
             // создать jwt
-            const jwt = jsonWebToken.sign(
-              {
-                _id: user._id,
-              },
-              'SECRET',
-            );
-            // прикрепить jwt
-            res.cookie('jwt', jwt, {
-              maxAge: 360000,
-              httpOnly: true,
-              sameSite: true,
-            });
-            res.send({ data: user.toJSON() });
-          } else {
-            throw new Error('Password is incorrect');
-          }
-        });
+              const jwt = jsonWebToken.sign(
+                {
+                  _id: user._id,
+                },
+                'SECRET',
+              );
+              // прикрепить jwt
+              res.cookie('jwt', jwt, {
+                maxAge: 360000,
+                httpOnly: true,
+                sameSite: true,
+              });
+              res.send({ data: user.toJSON() });
+            } else {
+              throw new ForbiddenError('Incorrect data');
+            }
+          })
+          .catch((err) => {
+            next(err);
+          });
       }
     })
     .catch((err) => {
-      next(err);
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Bad request'));
+      } else {
+        next(err);
+      }
     });
 };
 

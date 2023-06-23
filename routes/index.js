@@ -40,7 +40,7 @@ router.use(auth);
 router.use('/users', userRoutes);
 router.use('/cards', cardRoutes);
 router.use('/*', (req, res, next) => {
-  next(new NotFoundError('Not found'));
+  next(new NotFoundError('Page not found'));
 });
 
 module.exports = router;

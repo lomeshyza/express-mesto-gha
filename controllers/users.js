@@ -162,11 +162,7 @@ const login = (req, res, next) => {
       }
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new BadRequestError('Bad request'));
-      } else {
-        next(err);
-      }
+      next(err);
     });
 };
 

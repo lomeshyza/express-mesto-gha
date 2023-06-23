@@ -59,11 +59,7 @@ const likeCard = (req, res, next) => {
       }
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new BadRequestError('Bad request'));
-      } else {
-        next(err);
-      }
+      next(err);
     });
 };
 
@@ -80,11 +76,7 @@ const dislikeCard = (req, res, next) => Card.findByIdAndUpdate(
     }
   })
   .catch((err) => {
-    if (err.name === 'ValidationError') {
-      next(new BadRequestError('Bad request'));
-    } else {
-      next(err);
-    }
+    next(err);
   });
 
 module.exports = {
